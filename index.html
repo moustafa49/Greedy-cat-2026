@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Greedy Cat MAX</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+  <div id="app" class="p-4 max-w-md mx-auto"></div>
+
+<script>
+const foods = [
+  { name: "Chicken", type: "meat" },
+  { name: "Fish", type: "meat" },
+  { name: "Shrimp", type: "meat" },
+  { name: "Drumstick", type: "meat" },
+  { name: "Carrot", type: "veg" },
+  { name: "Tomato", type: "veg" },
+  { name: "Pepper", type: "veg" },
+  { name: "Corn", type: "veg" }
+];
+
+let results = JSON.parse(localStorage.getItem("gc_results")) || {};
+let last = [];
+
+function render() {
+  const total = Object.values(results).reduce((a,b)=>a+b,0);
+  const veg = foods.filter(f=>f.type==='veg').reduce((a,f)=>a+(results[f.name]||0),0);
+  const meat = foods.filter(f=>f.type==='meat').reduce((a,f)=>a+(results[f.name]||0),0);
+
+  let rec = veg > meat ? "🥕 ركّز خضار" : "🍗 ركّز لحوم";
+  if (last.length >= 3 && new Set(last.slice(0,3)).size <= 2) {
+    rec = "⚠️ تحذير تضليل";
+  }
+
+  document.getElementById("app").innerHTML = `
+    <h1 class="text-xl font-bold mb-2">Greedy Cat MAX 🐱</h1>
+    <p class="mb-2">التوصية: <b>${rec}</b></p>
+    <div class="grid grid-cols-2 gap-2 mb-3">
+      ${foods.map(f=>`
+        <button class="bg-blue-500 text-white p-2 rounded"
+          onclick="add('${f.name}')">${f.name}</button>
+      `).join("")}
+    </div>
+    <p class="text-sm">عدد الأدوار: ${total}</p>
+  `;
+}
+
+function add(name){
+  results[name] = (results[name]||0)+1;
+  last.unshift(name);
+  last = last.slice(0,10);
+  localStorage.setItem("gc_results", JSON.stringify(results));
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
